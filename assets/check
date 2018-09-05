@@ -7,7 +7,7 @@ exec 3>&1 # make stdout available as fd 3 for the result
 exec 1>&2 # redirect all output to stderr for logging
 
 # Read inputs
-payload=$(mktemp $TMPDIR/helm-resource-request.XXXXXX)
+payload=$(mktemp $TMPDIR/sentry-releases-resource-request.XXXXXX)
 cat > $payload <&0
 
 # Parse parameters
@@ -15,6 +15,19 @@ host=$(jq -r '.source.host // "https://sentry.io"' < $payload)
 token=$(jq -r '.source.token // ""' < $payload)
 organization=$(jq -r '.source.organization // ""' < $payload)
 project=$(jq -r '.source.project // ""' < $payload)
+
+if [ -z $token ]; then
+    echo "No token specified!"
+    exit 1
+fi
+if [ -z $organization ]; then
+    echo "No organization specified!"
+    exit 1
+fi
+if [ -z $project ]; then
+    echo "No project specified!"
+    exit 1
+fi
 
 curl -s -H "Authorization: Bearer $token" \
     "$host/api/0/projects/$organization/$project/releases/" \

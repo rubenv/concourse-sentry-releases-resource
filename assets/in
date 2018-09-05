@@ -22,10 +22,19 @@ host=$(jq -r '.source.host // "https://sentry.io"' < $payload)
 token=$(jq -r '.source.token // ""' < $payload)
 organization=$(jq -r '.source.organization // ""' < $payload)
 
+if [ -z $token ]; then
+    echo "No token specified!"
+    exit 1
+fi
+if [ -z $organization ]; then
+    echo "No organization specified!"
+    exit 1
+fi
+
 ref=$(jq -r '.version.ref // ""' < $payload)
 
 # Fetch release
-info=$(mktemp $TMPDIR/sentry-releases-resource-request.XXXXXX)
+info=$(mktemp $TMPDIR/sentry-releases-resource-info.XXXXXX)
 curl -s -H "Authorization: Bearer $token" \
     "$host/api/0/organizations/$organization/releases/$ref/" > $info
 

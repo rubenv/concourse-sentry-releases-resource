@@ -1,0 +1,84 @@
+#!/bin/bash
+
+set -e
+set -o pipefail
+
+exec 3>&1 # make stdout available as fd 3 for the result
+exec 1>&2 # redirect all output to stderr for logging
+
+source=$1
+
+if [ -z "$source" ]; then
+  echo "usage: $0 <path/to/source>"
+  exit 1
+fi
+
+# Read inputs
+source=$1
+payload=$(mktemp sentry-releases-resource-request.XXXXXX)
+cat > $payload <&0
+
+# Parse parameters
+host=$(jq -r '.source.host // "https://sentry.io"' < $payload)
+token=$(jq -r '.source.token // ""' < $payload)
+organization=$(jq -r '.source.organization // ""' < $payload)
+project=$(jq -r '.source.project // ""' < $payload)
+
+files=$(jq -r '.params.files // ""' < $payload)
+version_from=$(jq -r '.params.version_from // ""' < $payload)
+url_prefix=$(jq -r '.params.url_prefix // "~/"' < $payload)
+
+if [ -z $token ]; then
+    echo "No token specified!"
+    exit 1
+fi
+if [ -z $organization ]; then
+    echo "No organization specified!"
+    exit 1
+fi
+if [ -z $project ]; then
+    echo "No project specified!"
+    exit 1
+fi
+if [ -z $version_from ]; then
+    echo "No version file specified!"
+    exit 1
+fi
+
+if [ ! -f $source/$version_from ]; then
+    echo "Cannot read version from $version_from"
+    exit 1
+fi
+version=$(cat $source/$version_from)
+
+# Create version
+info=$(mktemp $TMPDIR/sentry-releases-resource-release.XXXXXX)
+curl -s -H "Authorization: Bearer $token" \
+    -X POST -H "Content-Type: application/json" \
+    -d "{\"version\": $(echo $version | jq -R .)}" \
+    "$host/api/0/projects/$organization/$project/releases/" > $info
+
+# Upload files
+if [ -d $source/$files ]; then
+    for filename in $source/$files/*.map; do
+        curl -s -H "Authorization: Bearer $token" \
+            -X POST -F file=@$filename -F name="$url_prefix$(basename $filename)" \
+            "$host/api/0/projects/$organization/$project/releases/$version/files/"
+        echo
+    done
+fi
+
+# Output metadata
+created=$(jq -r '.dateCreated // ""' < $info)
+
+jq -n "{
+    version: {
+        ref: $(echo $version | jq -R .),
+    },
+    metadata: [
+        {
+            name: \"created_at\",
+            value: $(echo $created | jq -R .),
+        }
+    ]
+}" >&3
