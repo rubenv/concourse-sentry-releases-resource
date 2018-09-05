@@ -1,4 +1,4 @@
-FROM alpine: latest
+FROM alpine:latest
 
 RUN apk add --update --upgrade --no-cache jq bash curl
 
