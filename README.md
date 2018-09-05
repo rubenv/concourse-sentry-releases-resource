@@ -1,4 +1,4 @@
-# Helm Resource for Sentry releases
+# Concourse Resource for Sentry releases
 
 Manage releases in [Sentry](https://sentry.io), can be used to upload sourcemaps.
 
