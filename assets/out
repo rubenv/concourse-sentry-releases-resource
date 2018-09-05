@@ -60,7 +60,7 @@ curl -s -H "Authorization: Bearer $token" \
 
 # Upload files
 if [ -d $source/$files ]; then
-    for filename in $source/$files/*.map; do
+    for filename in $source/$files/*; do
         curl -s -H "Authorization: Bearer $token" \
             -X POST -F file=@$filename -F name="$url_prefix$(basename $filename)" \
             "$host/api/0/projects/$organization/$project/releases/$version/files/"
