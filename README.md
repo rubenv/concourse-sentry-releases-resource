@@ -26,3 +26,7 @@ resource_types:
 ### `check`: Check for new releases
 
 Checks for new releases.
+
+### `in`: Fetch release.
+
+Fetches a release.

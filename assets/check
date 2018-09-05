@@ -16,7 +16,6 @@ token=$(jq -r '.source.token // ""' < $payload)
 organization=$(jq -r '.source.organization // ""' < $payload)
 project=$(jq -r '.source.project // ""' < $payload)
 
-
 curl -s -H "Authorization: Bearer $token" \
     "$host/api/0/projects/$organization/$project/releases/" \
     | jq "map({ \"ref\": .version }) | reverse" >&3

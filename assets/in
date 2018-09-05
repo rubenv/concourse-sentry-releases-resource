@@ -1,0 +1,45 @@
+#!/bin/bash
+
+set -e
+set -o pipefail
+
+exec 3>&1 # make stdout available as fd 3 for the result
+exec 1>&2 # redirect all output to stderr for logging
+
+source=$1
+
+if [ -z "$source" ]; then
+  echo "usage: $0 <path/to/source>"
+  exit 1
+fi
+
+# Read inputs
+payload=$(mktemp $TMPDIR/sentry-releases-resource-request.XXXXXX)
+cat > $payload <&0
+
+# Parse parameters
+host=$(jq -r '.source.host // "https://sentry.io"' < $payload)
+token=$(jq -r '.source.token // ""' < $payload)
+organization=$(jq -r '.source.organization // ""' < $payload)
+
+ref=$(jq -r '.version.ref // ""' < $payload)
+
+# Fetch release
+info=$(mktemp $TMPDIR/sentry-releases-resource-request.XXXXXX)
+curl -s -H "Authorization: Bearer $token" \
+    "$host/api/0/organizations/$organization/releases/$ref/" > $info
+
+# Write it
+created=$(jq -r '.dateCreated // ""' < $info)
+
+jq -n "{
+    version: {
+        ref: $(echo $ref | jq -R .),
+    },
+    metadata: [
+        {
+            name: \"created_at\",
+            value: $(echo $created | jq -R .),
+        }
+    ]
+}" >&3
