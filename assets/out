@@ -61,7 +61,11 @@ curl -s -H "Authorization: Bearer $token" \
 cat $info | jq .
 
 # Upload files
-if [ -d $source/$files ]; then
+if [ ! -z $files ]; then
+    if [ ! -d $source/$files ]; then
+        echo "Cannot find files directory: $files"
+        exit 1
+    fi
     for filename in $source/$files/*; do
         echo "Uploading $(basename $filename)"
         curl -s -H "Authorization: Bearer $token" \
