@@ -30,5 +30,5 @@ if [ -z $project ]; then
 fi
 
 curl -s -H "Authorization: Bearer $token" \
-    "$host/api/0/projects/$organization/$project/releases/" \
+    "${host%/}/api/0/projects/$organization/$project/releases/" \
     | jq "map({ \"ref\": .version }) | reverse" >&3
