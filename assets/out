@@ -54,7 +54,7 @@ version=$(cat $source/$version_from)
 # Create version
 echo "Creating release"
 info=$(mktemp $TMPDIR/sentry-releases-resource-release.XXXXXX)
-curl -s -H "Authorization: Bearer $token" \
+curl -sSf -H "Authorization: Bearer $token" \
     -X POST -H "Content-Type: application/json" \
     -d "{\"version\": $(echo $version | jq -R .)}" \
     "$host/api/0/projects/$organization/$project/releases/" > $info
@@ -68,7 +68,7 @@ if [ ! -z $files ]; then
     fi
     for filename in $source/$files/*; do
         echo "Uploading $(basename $filename)"
-        curl -s -H "Authorization: Bearer $token" \
+        curl -sSf -H "Authorization: Bearer $token" \
             -X POST -F file=@$filename -F name="$url_prefix$(basename $filename)" \
             "$host/api/0/projects/$organization/$project/releases/$version/files/" | jq .
         echo
