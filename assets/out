@@ -15,7 +15,7 @@ fi
 
 # Read inputs
 source=$1
-payload=$(mktemp sentry-releases-resource-request.XXXXXX)
+payload=$(mktemp -t sentry-releases-resource-request.XXXXXX)
 cat > $payload <&0
 
 # Parse parameters
@@ -53,7 +53,7 @@ version=$(cat $source/$version_from)
 
 # Create version
 echo "Creating release"
-info=$(mktemp sentry-releases-resource-release.XXXXXX)
+info=$(mktemp -t sentry-releases-resource-release.XXXXXX)
 curl -sSf -H "Authorization: Bearer $token" \
     -X POST -H "Content-Type: application/json" \
     -d "{\"version\": $(echo $version | jq -R .)}" \
