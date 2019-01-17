@@ -14,7 +14,7 @@ if [ -z "$source" ]; then
 fi
 
 # Read inputs
-payload=$(mktemp sentry-releases-resource-request.XXXXXX)
+payload=$(mktemp -t sentry-releases-resource-request.XXXXXX)
 cat > $payload <&0
 
 # Parse parameters
