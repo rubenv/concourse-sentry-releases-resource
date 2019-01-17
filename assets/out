@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -e
+set -eu
 set -o pipefail
 
 exec 3>&1 # make stdout available as fd 3 for the result
@@ -53,7 +53,7 @@ version=$(cat $source/$version_from)
 
 # Create version
 echo "Creating release"
-info=$(mktemp $TMPDIR/sentry-releases-resource-release.XXXXXX)
+info=$(mktemp sentry-releases-resource-release.XXXXXX)
 curl -s -H "Authorization: Bearer $token" \
     -X POST -H "Content-Type: application/json" \
     -d "{\"version\": $(echo $version | jq -R .)}" \

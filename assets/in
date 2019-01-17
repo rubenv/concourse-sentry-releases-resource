@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -e
+set -eu
 set -o pipefail
 
 exec 3>&1 # make stdout available as fd 3 for the result
@@ -14,7 +14,7 @@ if [ -z "$source" ]; then
 fi
 
 # Read inputs
-payload=$(mktemp $TMPDIR/sentry-releases-resource-request.XXXXXX)
+payload=$(mktemp sentry-releases-resource-request.XXXXXX)
 cat > $payload <&0
 
 # Parse parameters
