@@ -29,6 +29,6 @@ if [ -z $project ]; then
     exit 1
 fi
 
-curl -s -H "Authorization: Bearer $token" \
+curl -sSf -H "Authorization: Bearer $token" \
     "${host%/}/api/0/projects/$organization/$project/releases/" \
     | jq "map({ \"ref\": .version }) | reverse" >&3
