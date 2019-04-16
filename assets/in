@@ -34,7 +34,7 @@ fi
 ref=$(jq -r '.version.ref // ""' < $payload)
 
 # Fetch release
-info=$(mktemp $TMPDIR/sentry-releases-resource-info.XXXXXX)
+info=$(mktemp -t sentry-releases-resource-info.XXXXXX)
 curl -sSf -H "Authorization: Bearer $token" \
     "${host%/}/api/0/organizations/$organization/releases/$ref/" > $info
 
